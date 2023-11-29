@@ -5,6 +5,7 @@ ob_start("ob_gzhandler");
 
 $media_url = "media/";
 $path_to_me = $_SERVER['SCRIPT_NAME'];
+$cookie_file_name = NULL;
 
 require "phrets.php";
 session_start();  // start session management

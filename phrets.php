@@ -25,6 +25,8 @@ class phRETS {
 	private $server_protocol;
 	private $server_version;
 	private $server_software;
+	private $username;
+	private $password;
 	private $static_headers = array();
 	private $server_information = array();
 	private $cookie_file = "";
@@ -172,7 +174,7 @@ class phRETS {
 			$requested_numbers = explode(":", $photo_number);
 			if (is_array($requested_numbers)) {
 				foreach ($requested_numbers as $numb) {
-					$numb = trim($numb);
+					$numb = $this->trim($numb);
 					if (!empty($numb) || $numb == "0") {
 					$send_numb .= "{$numb}:";
 					}
@@ -181,7 +183,7 @@ class phRETS {
 			$send_numb = preg_replace('/\:$/', '', $send_numb);
 		}
 		else {
-			$send_numb = trim($photo_number);
+			$send_numb = $this->trim($photo_number);
 		}
 
 		if (strpos($id, ',') !== false) {
@@ -190,7 +192,7 @@ class phRETS {
 			$requested_ids = explode(",", $id);
 			if (is_array($requested_ids)) {
 				foreach ($requested_ids as $req_id) {
-				$req_id = trim($req_id);
+				$req_id = $this->trim($req_id);
 					if (!empty($req_id) && $req_id != "0") {
 						$send_id .= "{$req_id}:{$send_numb},";
 					}
@@ -199,7 +201,7 @@ class phRETS {
 			$send_id = preg_replace('/\,$/', '', $send_id);
 		}
 		else {
-			$send_id = trim($id).':'.$send_numb;
+			$send_id = $this->trim($id).':'.$send_numb;
 		}
 
 		// make request
@@ -285,8 +287,8 @@ class phRETS {
 							@list($header, $value) = explode(':', $line, 2);
 						}
 
-						$header = trim($header);
-						$value = trim($value);
+						$header = $this->trim($header);
+						$value = $this->trim($value);
 						if (!empty($header)) {
 							if ($header == "Description") {
 								// for servers where the implementors didn't read the next word in the RETS spec.
@@ -1473,8 +1475,8 @@ class phRETS {
 			@list($name,$value) = explode("=", $line, 2);
 			}
 
-			$name = trim($name);
-			$value = trim($value);
+			$name = $this->trim($name);
+			$value = $this->trim($value);
 			if (!empty($name) && !empty($value)) {
 				if (isset($this->allowed_capabilities[$name]) || preg_match('/^X\-/', $name) == true) {
 					$this->capability_url[$name] = $value;
@@ -1621,14 +1623,14 @@ class phRETS {
 			// calculate RETS-UA-Authorization header
 			$ua_a1 = md5($this->static_headers['User-Agent'] .':'. $this->ua_pwd);
 			$session_id_to_calculate_with = ($this->use_interealty_ua_auth == true) ? "" : $this->session_id;
-			$ua_dig_resp = md5(trim($ua_a1) .':'. trim($this->request_id) .':'. trim($session_id_to_calculate_with) .':'. trim($this->static_headers['RETS-Version']));
+			$ua_dig_resp = md5($this->trim($ua_a1) .':'. $this->trim($this->request_id) .':'. $this->trim($session_id_to_calculate_with) .':'. $this->trim($this->static_headers['RETS-Version']));
 			$request_headers .= "RETS-UA-Authorization: Digest {$ua_dig_resp}\r\n";
 		}
 
 		$this->last_request_url = $request_url;
 		curl_setopt($this->ch, CURLOPT_URL, $request_url);
 
-		curl_setopt($this->ch, CURLOPT_HTTPHEADER, array(trim($request_headers)));
+		curl_setopt($this->ch, CURLOPT_HTTPHEADER, array($this->trim($request_headers)));
 		// do it
 		$response_body = curl_exec($this->ch);
 		$response_code = curl_getinfo($this->ch, CURLINFO_HTTP_CODE);
@@ -1679,14 +1681,14 @@ class phRETS {
 		$header = null;
 		$value = null;
 
-		$trimmed_call_string = trim($call_string);
+		$trimmed_call_string = $this->trim($call_string);
 
 		if (strpos($call_string, ':') !== false) {
 			@list($header, $value) = explode(':', $trimmed_call_string, 2);
 		}
 
-		$header = trim($header);
-		$value = trim($value);
+		$header = $this->trim($header);
+		$value = $this->trim($value);
 
 		if ( preg_match('/^HTTP\/1/', $trimmed_call_string) ) {
 			$value = $trimmed_call_string;
@@ -1698,7 +1700,7 @@ class phRETS {
 			$this->last_response_headers[$header] = $value;
 			$last_remembered_header = $header;
 		}
-		elseif (!empty( $trimmed_call_string )) {
+		elseif (!empty( $trimmed_call_string ) && !empty( $this->last_remembered_header )) {
 			// continuation of last header.  append to previous
 			$this->last_response_headers[$this->last_remembered_header] .= $trimmed_call_string;
 		}
@@ -1766,7 +1768,7 @@ class phRETS {
 			return $in_str;
 		}
 		else {
-			return utf8_encode($in_str);
+			return mb_convert_encoding($in_str, "UTF-8", $cur_encoding);
 		}
 	}
 
@@ -1827,6 +1829,11 @@ class phRETS {
 		}
 
 		return true;
+	}
+
+
+	private function trim($str) {
+		return is_null($str) ? $str : trim($str);
 	}
 
 
