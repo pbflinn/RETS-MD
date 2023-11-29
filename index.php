@@ -109,6 +109,10 @@ function code_mddetails() {
 		}
 		else {
 
+			uasort($rets_metadata, function($a, $b) {
+				return $a['SystemName'] < $b['SystemName'] ? -1 : 1;
+			});
+
 			$searchable_fields = array();
 			$total_fields = 0;
 			$metadata_fields = "";
