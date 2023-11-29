@@ -97,6 +97,7 @@ function code_mddetails() {
 		}
 
 		$resource_info = $rets->GetMetadataInfo();
+		$keyfield_for_resource = $resource_info[$details_for_resource]['KeyField'];
 
 		// make specific GetMetadata request for this resource class
 		$rets_metadata = $rets->GetMetadataTable($details_for_resource, $details_for_class);
@@ -221,8 +222,8 @@ function code_mddetails() {
 			echo "<td width='340' valign='top'>\n";
 				echo "<table border='0' cellpadding='1' cellspacing='1' width='100%'>\n";
 
-				if (detect_capable_server($_SESSION['login_url']) != 0) {
-					echo "<tr><td width='1%'><img src='{$GLOBALS['media_url']}magnifier.gif' alt='View Sample Data'></td><td width='99%' class='detail'><a href=\"\" id='peek-link' data-resource='{$details_for_resource}' data-class='{$details_for_class}' data-format='COMPACT-DECODED'>Take a Peek</a> &nbsp;<span style='color: red;'>NEW!</span></td></tr>\n";
+				if (detect_capable_server($_SESSION['login_url']) != 0 || $keyfield_for_resource) {
+					echo "<tr><td width='1%'><img src='{$GLOBALS['media_url']}magnifier.gif' alt='View Sample Data'></td><td width='99%' class='detail'><a href=\"\" id='peek-link' data-resource='{$details_for_resource}' data-class='{$details_for_class}' data-keyfield='{$keyfield_for_resource}' data-format='COMPACT-DECODED'>Take a Peek</a> &nbsp;<span style='color: red;'>NEW!</span></td></tr>\n";
 					echo "<tr><td></td><td class='detail'>View a live sample of records in the below format</td></tr>\n";
 				}
 
@@ -261,11 +262,11 @@ function code_peek() {
 
 	if ($_REQUEST['r_format'] == "COMPACT") {
 		$current_format = "COMPACT";
-		$format_link = "<a href='' id='format-switch' data-resource='{$_REQUEST['r_resource']}' data-class='{$_REQUEST['r_class']}' data-format='COMPACT-DECODED'>Switch to COMPACT-DECODED</a>";
+		$format_link = "<a href='' id='format-switch' data-resource='{$_REQUEST['r_resource']}' data-class='{$_REQUEST['r_class']}' data-keyfield='{$_REQUEST['r_keyfield']}' data-format='COMPACT-DECODED'>Switch to COMPACT-DECODED</a>";
 	}
 	else {
 		$current_format = "COMPACT-DECODED";
-		$format_link = "<a href='' id='format-switch' data-resource='{$_REQUEST['r_resource']}' data-class='{$_REQUEST['r_class']}' data-format='COMPACT'>Switch to COMPACT</a>";
+		$format_link = "<a href='' id='format-switch' data-resource='{$_REQUEST['r_resource']}' data-class='{$_REQUEST['r_class']}' data-keyfield='{$_REQUEST['r_keyfield']}' data-format='COMPACT'>Switch to COMPACT</a>";
 	}
 
 	// set things up
@@ -311,8 +312,11 @@ function code_peek() {
 			$records[] = $rec;
 		}
 	}
-	else {
-
+	elseif ($_REQUEST['r_keyfield']) {
+		$search = $rets->SearchQuery($_REQUEST['r_resource'], $_REQUEST['r_class'], "({$_REQUEST['r_keyfield']}=0+)", array('Format' => $current_format, 'QueryType' => 'DMQL2', 'Limit' => 5, 'RestrictedIndicator' => 'RETSMDRESTR') );
+		while ($rec = $rets->FetchRow($search)) {
+			$records[] = $rec;
+		}
 	}
 
 	if (!$search) {

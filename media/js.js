@@ -106,8 +106,9 @@ function showPeekData(elem) {
 	var rets_resource = jQuery(elem).attr("data-resource");
 	var rets_class = jQuery(elem).attr("data-class");
 	var rets_format = jQuery(elem).attr("data-format");
+	var rets_keyfield = jQuery(elem).attr("data-keyfield");
 
-	jQuery.get(this_page, { action: 'peek', r_resource: rets_resource, r_class: rets_class, r_format: rets_format }, function(data) {
+	jQuery.get(this_page, { action: 'peek', r_resource: rets_resource, r_class: rets_class, r_format: rets_format, r_keyfield: rets_keyfield }, function(data) {
 		jQuery.modal.close();
 
 		setTimeout(function () {
