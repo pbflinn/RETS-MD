@@ -81,6 +81,11 @@ function code_mddetails() {
 			$rets->SetParam("force_basic_authentication", true);
 		}
 
+		if ($_SESSION['rets_debug'] == "true") {
+			$rets->SetParam("debug_mode", true);
+			$rets->SetParam("debug_file", "/tmp/rets_debug.txt");
+		}
+
 		// make first connection
 		$connect = $rets->Connect($_SESSION['login_url'], $_SESSION['username'], $_SESSION['password'], $_SESSION['ua_pwd']);
 
@@ -272,6 +277,11 @@ function code_peek() {
 		$rets->SetParam("force_basic_authentication", true);
 	}
 
+	if ($_SESSION['rets_debug'] == "true") {
+		$rets->SetParam("debug_mode", true);
+		$rets->SetParam("debug_file", "/tmp/rets_debug.txt");
+	}
+
 	// make first connection
 	$connect = $rets->Connect($_SESSION['login_url'], $_SESSION['username'], $_SESSION['password'], $_SESSION['ua_pwd']);
 
@@ -454,6 +464,11 @@ function code_export() {
 		$rets->SetParam("force_basic_authentication", true);
 	}
 
+	if ($_SESSION['rets_debug'] == "true") {
+		$rets->SetParam("debug_mode", true);
+		$rets->SetParam("debug_file", "/tmp/rets_debug.txt");
+	}
+
 	// make first connection
 	$connect = $rets->Connect($_SESSION['login_url'], $_SESSION['username'], $_SESSION['password'], $_SESSION['ua_pwd']);
 
@@ -519,6 +534,11 @@ function code_objects() {
 
 	if ($_SESSION['force_basic'] == "true") {
 		$rets->SetParam("force_basic_authentication", true);
+	}
+
+	if ($_SESSION['rets_debug'] == "true") {
+		$rets->SetParam("debug_mode", true);
+		$rets->SetParam("debug_file", "/tmp/rets_debug.txt");
 	}
 
 	// make first connection
@@ -600,6 +620,11 @@ function code_lookup() {
 
 	if ($_SESSION['force_basic'] == "true") {
 		$rets->SetParam("force_basic_authentication", true);
+	}
+
+	if ($_SESSION['rets_debug'] == "true") {
+		$rets->SetParam("debug_mode", true);
+		$rets->SetParam("debug_file", "/tmp/rets_debug.txt");
 	}
 
 	// make first connection
@@ -694,6 +719,11 @@ function code_login() {
 		 $rets->SetParam("force_basic_authentication", true);
 	}
 
+	if ($_REQUEST['rets_debug'] == "true") {
+		$rets->SetParam("debug_mode", true);
+		$rets->SetParam("debug_file", "/tmp/rets_debug.txt");
+	}
+
 	// test connection
 	$connect = $rets->Connect(trim($_REQUEST['login_url']), trim($_REQUEST['username']), trim($_REQUEST['password']), trim($_REQUEST['ua_pwd']));
 
@@ -711,6 +741,11 @@ function code_login() {
 
 	// save login values to the user's session
 	$_SESSION['logged_in'] = "yes";
+
+	$session_keys = ['login_url', 'username', 'password', 'rets_version', 'user_agent', 'ua_pwd', 'force_basic', 'rets_debug'];
+	foreach ($session_keys as $key) {
+		$_SESSION[$key] = null;
+	}
 
 	if (isset($_REQUEST['login_url'])) {
 		$_SESSION['login_url'] = trim($_REQUEST['login_url']);
@@ -732,6 +767,9 @@ function code_login() {
 	}
 	if (isset($_REQUEST['force_basic'])) {
 		$_SESSION['force_basic'] = $_REQUEST['force_basic'];
+	}
+	if (isset($_REQUEST['rets_debug'])) {
+		$_SESSION['rets_debug'] = $_REQUEST['rets_debug'];
 	}
 
 	// send back to the beginning
@@ -770,6 +808,11 @@ function code_main() {
 
 	if ($_SESSION['force_basic'] == "true") {
 	        $rets->SetParam("force_basic_authentication", true);
+	}
+
+	if ($_SESSION['rets_debug'] == "true") {
+		$rets->SetParam("debug_mode", true);
+		$rets->SetParam("debug_file", "/tmp/rets_debug.txt");
 	}
 
 	// make first connection
@@ -956,14 +999,16 @@ if (isset($_REQUEST['load']) && $_REQUEST['load'] == "demo") {
 	$username = "Joe";
 	$password = 'Schmoe';
 	$user_agent = "RETSMD/1.0";
+	$ua_pwd = "";
 	$rets_version = "1.5";
 }
 else {
 	$user_agent = "RETSMD/1.0";
+	$ua_pwd = "";
 	$rets_version = "1.5";
-	$username = $_REQUEST['username'];
-	$password = $_REQUEST['password'];
-	$login_url = $_REQUEST['login_url'];
+	$username = $_REQUEST['username'] ?? "";
+	$password = $_REQUEST['password'] ?? "";
+	$login_url = $_REQUEST['login_url'] ?? "";
 }
 
 $possible_versions = array("1.0","1.5","1.7","1.7.2");
@@ -990,11 +1035,12 @@ echo "
 			<tr><td width='25%'><b><label for='l-login_url'>Login URL:</label></b></td><td width='75%'><input type='text' id='l-login_url' name='login_url' size='65' value='{$login_url}'/></td></tr>
 			<tr><td><b><label for='l-username'>Username:</label></b></td><td><input type='text' id='l-username' name='username' size='15' value='{$username}'/></td></tr>
 			<tr><td><b><label for='l-password'>Password:</label></b></td><td><input type='password' id='l-password' name='password' size='15' value='{$password}'/></td></tr>
-			<tr class='extra-link-row'><td></td><td><a href='' id='extra-link'>Show More Options</a></td></tr>
-			<tr class='extra'><td><b><label for='l-user_agent'>User-Agent:</label></b></td><td><input type='text' id='l-user_agent' name='user_agent' size='20' value='{$user_agent}'/></td></tr>
-			<tr class='extra'><td><b><label for='l-ua_pwd'>User-Agent Password:</label></b></td><td><input type='password' id='l-ua_pwd' name='ua_pwd' size='15' value='{$ua_pwd}'/> <small>(Leave blank if you don't have one)</small></td></tr>
-			<tr class='extra'><td><b><label for='l-rets_version'>RETS Version:</label></b></td><td><select id='l-rets_version' name='rets_version'>{$version_options}</select></td></tr>
-			<tr class='extra'><td><b>Force Basic Auth.:</b></td><td><label for='force_basic_y'><input type='radio' name='force_basic' value='true' id='force_basic_y'/> Yes &nbsp;</label> &nbsp; <label for='force_basic_n'><input type='radio' name='force_basic' value='false' checked='checked' id='force_basic_n'/> No</label></td></tr>
+			<!-- <tr class='extra-link-row'><td></td><td><a href='' id='extra-link'>Show More Options</a></td></tr> -->
+			<tr class='was-extra'><td><b><label for='l-user_agent'>User-Agent:</label></b></td><td><input type='text' id='l-user_agent' name='user_agent' size='20' value='{$user_agent}'/></td></tr>
+			<tr class='was-extra'><td><b><label for='l-ua_pwd'>User-Agent Password:</label></b></td><td><input type='password' id='l-ua_pwd' name='ua_pwd' size='15' value='{$ua_pwd}'/> <small>(Leave blank if you don't have one)</small></td></tr>
+			<tr class='was-extra'><td><b><label for='l-rets_version'>RETS Version:</label></b></td><td><select id='l-rets_version' name='rets_version'>{$version_options}</select></td></tr>
+			<tr class='was-extra'><td><b>Force Basic Auth.:</b></td><td><label for='force_basic_y'><input type='radio' name='force_basic' value='true' id='force_basic_y'/> Yes &nbsp;</label> &nbsp; <label for='force_basic_n'><input type='radio' name='force_basic' value='false' checked='checked' id='force_basic_n'/> No</label></td></tr>
+			<tr class='was-extra'><td><b>Debug Mode:</b></td><td><label for='rets_debug_y'><input type='radio' name='rets_debug' value='true' id='rets_debug_y'/> Yes &nbsp;</label> &nbsp; <label for='rets_debug_n'><input type='radio' name='rets_debug' value='false' checked='checked' id='rets_debug_n'/> No</label></td></tr>
 			<tr><td></td><td><input type='submit' value='    Login    ' id='login-button' /></td></tr>
 		</table>
 		</form>
@@ -1004,7 +1050,7 @@ echo "
 
 <p style='text-align: center'><a href='{$GLOBALS['path_to_me']}?load=demo'>Try the demo</a></p>\n
 
-<a href='http://github.com/troydavisson/RETS-MD'><img style='position: absolute; top: 0; right: 0; border: 0;' src='https://a248.e.akamai.net/assets.github.com/img/e6bef7a091f5f3138b8cd40bc3e114258dd68ddf/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67' alt='Fork me on GitHub'></a>
+<a href='http://github.com/troydavisson/RETS-MD'><img style='position: absolute; top: 0; right: 0; border: 0;' src='https://s3.amazonaws.com/github/ribbons/forkme_right_green_007200.png' alt='Fork me on GitHub'></a>
 
 ";
 
@@ -1030,7 +1076,7 @@ $page_title = (empty($page_title)) ? "Main" : $page_title;
 <title>RETS M.D. - <?php echo $page_title; ?></title>
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
 <link href="<?php echo $GLOBALS['media_url']; ?>styles.css?3" rel="stylesheet" type="text/css" />
-<script language="javascript" type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.0/jquery.min.js"></script>
+<script language="javascript" type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.5.0/jquery.min.js"></script>
 <script type="text/javascript">
 jQuery.noConflict();
 </script>
