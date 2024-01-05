@@ -213,7 +213,7 @@ function code_mddetails() {
 				}
 
 				$object_types = $rets->GetMetadataObjects($details_for_resource);
-				if (count($object_types) > 0 && is_array($object_types)) {
+				if (is_array($object_types) && count($object_types) > 0) {
 					echo "<tr><td valign='top'><b>Object Types:</b></td><td class='detail'><a href=\"\" id='object-window' data-resource='{$details_for_resource}' title=\"View available media/object types for the '{$details_for_resource}' resource\">View Object Types</a></td></tr>\n";
 				}
 
@@ -341,10 +341,10 @@ function code_peek() {
 
 	$field_list = $rets->SearchGetFields($search);
 	$rets->FreeResult($search);
-	
+
 	$system_to_long = array();
 	$table_metadata = $rets->GetMetadataTable($_REQUEST['r_resource'], $_REQUEST['r_class']);
-	
+
 	foreach ($table_metadata as $fi) {
 		$system_to_long["{$fi['SystemName']}"] = $fi['LongName'];
 	}
@@ -378,7 +378,7 @@ function code_peek() {
 	echo "</tr>\n";
 
 	echo "</table>\n";
-	
+
 	$rets->Disconnect();
 
 echo "
