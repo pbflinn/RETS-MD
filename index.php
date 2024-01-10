@@ -856,7 +856,12 @@ function code_main() {
 	echo "<tr><td valign='top'><b>Login URL:</b></td><td class='detail'>{$full_login_url}</td></tr>\n";
 
 	// read back information from connection request
-	$server_version = preg_replace('/RETS\//', '', $rets->GetServerVersion());
+	$server_version = $rets->GetServerVersion();
+	if (empty($server_version)) {
+		$server_version = "(unknown)";
+	} else {
+		$server_version = preg_replace('/RETS\//', '', $server_version);
+	}
 	echo "<tr><td valign='top'><b>RETS Version:</b></td><td class='detail'>{$server_version}</td></tr>\n";
 
 	// read back information from connection request
